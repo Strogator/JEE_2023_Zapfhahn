@@ -2,18 +2,6 @@ version: '3.8'
 
 services:
 
-  zapfhahn-db:
-    image: mysql:8.2.0-oracle
-    container_name: zapfhahn-db
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: zapfhahn
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
-
-
   active-mq:
     image: apache/activemq-artemis:latest-alpine
     container_name: active-mq
@@ -23,6 +11,8 @@ services:
     environment:
       - ARTEMIS_USER=mq
       - ARTEMIS_PASSWORD=mq
+    networks:
+      - zapfhahn-network
 
   eureka-server:
     image: zapfhahn/eureka
@@ -36,6 +26,8 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
     depends_on:
       - active-mq
+    networks:
+      - zapfhahn-network
 
   order-service:
     image: zapfhahn/order
@@ -47,13 +39,15 @@ services:
       dockerfile: Dockerfile
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/zapfhahn
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATASOURCE_URL=jdbc:mysql://zapfhahn-db:3306/zapfhahn
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
     depends_on:
       - active-mq
       - eureka-server
       - zapfhahn-db
+    networks:
+      - zapfhahn-network
 
   notification-service:
     image: zapfhahn/notification
@@ -65,12 +59,52 @@ services:
       dockerfile: Dockerfile
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/zapfhahn
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATASOURCE_URL=jdbc:mysql://zapfhahn-db:3306/zapfhahn
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
     depends_on:
       - active-mq
       - eureka-server
       - zapfhahn-db
+    networks:
+      - zapfhahn-network
 
+  zapfhahn-db:
+    image: mysql:8.0
+    container_name: zapfhahn-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zapfhahn
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - zapfhahn-network
 
+  api-gateway:
+    image: zapfhahn/apigateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    build:
+      context: ../api-gateway
+      dockerfile: Dockerfile
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - zapfhahn-network
+
+networks:
+  zapfhahn-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
