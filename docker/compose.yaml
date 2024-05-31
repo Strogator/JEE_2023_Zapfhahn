@@ -2,6 +2,18 @@ version: '3.8'
 
 services:
 
+  zapfhahn-db:
+    image: mysql:8.2.0-oracle
+    container_name: zapfhahn-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zapfhahn
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+
+
   active-mq:
     image: apache/activemq-artemis:latest-alpine
     container_name: active-mq
@@ -35,9 +47,13 @@ services:
       dockerfile: Dockerfile
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/zapfhahn
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
       - active-mq
       - eureka-server
+      - zapfhahn-db
 
   notification-service:
     image: zapfhahn/notification
@@ -49,6 +65,12 @@ services:
       dockerfile: Dockerfile
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/zapfhahn
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
       - active-mq
       - eureka-server
+      - zapfhahn-db
+
+
