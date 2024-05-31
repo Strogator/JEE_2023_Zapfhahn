@@ -1,12 +1,14 @@
 package ch.hearc.jeespring.comi.notificationservice.listener;
 
 import ch.hearc.jeespring.comi.notificationservice.model.Order;
+import ch.hearc.jeespring.comi.notificationservice.service.EmailService;
 import ch.hearc.jeespring.comi.notificationservice.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,13 @@ public class OrderListener {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${email.adress}")
+    private String emailAdress;
+
 
     @JmsListener(destination = "order.queue")
     public void receiveOrder(Message message) {
@@ -44,6 +53,9 @@ public class OrderListener {
     private void sendNotification(Order order) {
         // Logique pour envoyer une notification (par exemple, un email ou un SMS)
         notificationService.createNotification("Order received and saved !");
+        emailService.sendEmail(emailAdress, "Zapfhahn order",
+                "Dear customer,\n your order for " +order.getQuantity() + ", " + order.getBeerName() +
+                        "had been collected ! \n We thank you for your trust.");
         System.out.println("Notification sent for order: " + order.getId());
     }
 }
