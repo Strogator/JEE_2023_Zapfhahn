@@ -25,26 +25,12 @@ public class Order implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getBeerName() {
         return beerName;
-    }
-
-    public void setBeerName(String beerName) {
-        this.beerName = beerName;
     }
 
     public int getQuantity() {
         return quantity;
     }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-
 
 }

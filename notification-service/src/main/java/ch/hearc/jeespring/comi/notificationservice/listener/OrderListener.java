@@ -27,11 +27,11 @@ public class OrderListener {
     @Autowired
     private EmailService emailService;
 
-    @Value("${email.adress}")
-    private String emailAdress;
+    @Value("${email.address}")
+    private String emailAddress;
 
 
-    @JmsListener(destination = "order.queue")
+    @JmsListener(destination = "${spring.jms.template.default-destination}")
     public void receiveOrder(Message message) {
         try {
             if (message instanceof TextMessage) {
@@ -39,7 +39,6 @@ public class OrderListener {
                 System.out.println("Received raw JSON: " + jsonOrder);
                 Order order = objectMapper.readValue(jsonOrder, Order.class);
                 System.out.println("Deserialized order: " + order);
-                // Implémenter la logique de notification
                 sendNotification(order);
             } else {
                 System.err.println("Received message of unexpected type: " + message.getClass());
@@ -51,11 +50,13 @@ public class OrderListener {
     }
 
     private void sendNotification(Order order) {
-        // Logique pour envoyer une notification (par exemple, un email ou un SMS)
         notificationService.createNotification("Order received and saved !");
-        emailService.sendEmail(emailAdress, "Zapfhahn order",
-                "Dear customer,\n your order for " +order.getQuantity() + ", " + order.getBeerName() +
-                        "had been collected ! \n We thank you for your trust.");
+        emailService.sendEmail(emailAddress, "Zapfhahn order",
+                "Dear customer,\n \n" +
+                        "Thank you for your order with Zapfhahn.\n \n" +
+                        "We are pleased to confirm that your order for " + order.getQuantity() + " units of " +
+                        order.getBeerName() + " has been carefully prepared and is ready for collection. \n \n" +
+                        "Warm regards, \n \nAlessio from Zapfhahn.");
         System.out.println("Notification sent for order: " + order.getId());
     }
 }

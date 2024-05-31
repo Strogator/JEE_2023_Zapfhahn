@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.jms.ConnectionFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -18,17 +19,23 @@ import org.springframework.jms.support.converter.MessageType;
 @EnableJms
 public class JmsConfig {
 
-    private static final String BROKER_URL = "tcp://active-mq:61616";
-    private static final String ORDER_QUEUE = "order.queue";
+    @Value("${spring.activemq.broker-url}")
+    private String brokerUrl;
 
-    private static final String USERNAME = "mq";
-    private static final String PASSWORD = "mq";
+    @Value("${spring.activemq.user}")
+    private String username;
+
+    @Value("${spring.activemq.password}")
+    private String password;
+
+    @Value("${spring.jms.template.default-destination}")
+    private String defaultDestination;
 
     @Bean
     public ConnectionFactory connectionFactory() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
-        connectionFactory.setUser(USERNAME);
-        connectionFactory.setPassword(PASSWORD);
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
+        connectionFactory.setUser(username);
+        connectionFactory.setPassword(password);
         return connectionFactory;
     }
 
@@ -37,7 +44,7 @@ public class JmsConfig {
         JmsTemplate template = new JmsTemplate();
         template.setConnectionFactory(connectionFactory());
         template.setMessageConverter(messageConverter());
-        template.setDefaultDestinationName(ORDER_QUEUE);
+        template.setDefaultDestinationName(defaultDestination);
 
         return template;
     }
