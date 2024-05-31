@@ -6,6 +6,12 @@ Alessio Comi
 ## Introduction
 Ce projet scolaire, développé dans le cadre du programme d'ingénierie de la HE-Arc à Neuchâtel, Suisse, est un microservice en Spring destiné à la commande de bières. Le projet utilise Docker pour faciliter la mise en service et le déploiement.
 
+## Prérequis
+- Git
+- Docker
+- Maven
+- Adresse email pour les notifications
+
 ## Installation
 Pour installer et lancer le projet Zapfhahn, suivez ces étapes :
 
