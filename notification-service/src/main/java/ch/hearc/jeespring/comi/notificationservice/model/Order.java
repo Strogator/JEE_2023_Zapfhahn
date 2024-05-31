@@ -7,12 +7,18 @@ public class Order implements Serializable {
     private String beerName;
     private int quantity;
 
-    // getters and setters
+    public Order() {
+    }
 
     public Order(Long id, String beerName, int quantity) {
         this.id = id;
         this.beerName = beerName;
         this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{id=" + id + ", beerName='" + beerName + "', quantity=" + quantity + "}";
     }
 
     public Long getId() {

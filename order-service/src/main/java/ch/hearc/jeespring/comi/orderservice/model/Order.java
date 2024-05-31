@@ -14,6 +14,19 @@ public class Order implements Serializable {
     private String beerName;
     private int quantity;
 
+    public Order() {
+    }
+
+    public Order(String beerName, int quantity) {
+        this.beerName = beerName;
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{id=" + id + ", beerName='" + beerName + "', quantity=" + quantity + "}";
+    }
+
     // getters and setters
 
     public Long getId() {

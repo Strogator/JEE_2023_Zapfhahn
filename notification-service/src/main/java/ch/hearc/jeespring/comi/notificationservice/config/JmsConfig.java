@@ -47,6 +47,7 @@ public class JmsConfig {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory());
         factory.setConcurrency("1-1");
+        factory.setMessageConverter(messageConverter());
         return factory;
     }
 
@@ -54,6 +55,7 @@ public class JmsConfig {
     public MessageConverter messageConverter() {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
+        converter.setTypeIdPropertyName("_type");
         converter.setObjectMapper(objectMapper());
         return converter;
     }
@@ -63,7 +65,6 @@ public class JmsConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         return mapper;
     }
 }
